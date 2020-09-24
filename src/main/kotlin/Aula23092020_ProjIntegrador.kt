@@ -3,6 +3,8 @@ package aula23092020
 fun main(){
 
     var icLivros = Biblioteca("IC Livros","23/09/2020")
+    var cliente1 = Cliente("Igor","123456")
+    var funcionario1 = Funcionario("Igor","123456")
     var livro1 = Livro(
         "L1"
         ,"Livro 1"
@@ -59,16 +61,51 @@ fun main(){
 //    icLivros.consultar("C1")
 //    icLivros.consultar("L5")
 
-    icLivros.alugarLivro("L1")
+    icLivros.alugarLivro("L1",cliente1,funcionario1)
 //    icLivros.alugarLivro("C1")
 //    icLivros.alugarLivro("L5")
 
 //    icLivros.efetuarVenda("L1")
-    icLivros.efetuarVenda("C1")
+    icLivros.efetuarVenda("C1",cliente1,funcionario1)
 //    icLivros.efetuarVenda("L5")
 
+    println("")
     icLivros.verificarEstoque()
 //    icLivros.consultar() //Consultar acervo de livros/coleções da biblioteca
+
+
+    println("\n Cliente ${cliente1.nome} - historico de Aluguel")
+    cliente1.historicoAluguel?.forEach {
+        var colecao = (it as? Colecao)
+        colecao?.let{
+            println("Coleção Alugada: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoAluguelDia}")
+        } ?: println("Livro Alugado: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoAluguelDia}")
+    }
+
+    println("\n Cliente ${cliente1.nome} - historico de Compra")
+    cliente1.historicoCompra?.forEach {
+        var colecao = (it as? Colecao)
+        colecao?.let{
+            println("Coleção Comprada: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoVenda}")
+        } ?: println("Livro Comprado: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoVenda}")
+    }
+
+
+    println("\n Funcionário ${funcionario1.nome} - historico de Aluguel")
+    funcionario1.historicoAluguel?.forEach {
+        var colecao = (it as? Colecao)
+        colecao?.let{
+            println("Coleção Alugada: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoAluguelDia}")
+        } ?: println("Livro Alugado: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoAluguelDia}")
+    }
+
+    println("\n Funcionário ${funcionario1.nome} - historico de Venda")
+    funcionario1.historicoVenda?.forEach {
+        var colecao = (it as? Colecao)
+        colecao?.let{
+            println("Coleção Comprada: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoVenda}")
+        } ?: println("Livro Comprado: ${it.codigo} | ${it.titulo} | ${it.autor} | ${it.anolancamento} | ${it.precoVenda}")
+    }
 
 }
 
@@ -124,7 +161,7 @@ class Biblioteca (var nome: String, var dataCriacao: String) {
         }
     }
 
-    fun alugarLivro(infoConsulta:String){
+    fun alugarLivro(infoConsulta:String,cliente: Cliente, funcionario: Funcionario){
         var encontrouInfo: Boolean = false
         listaLivros.forEach(){
             if(it.key.codigo == infoConsulta || it.key.titulo == infoConsulta){
@@ -134,6 +171,8 @@ class Biblioteca (var nome: String, var dataCriacao: String) {
                 it.value.forEach() {
                     it.estadoAtual = "Alugado"
                 }
+                cliente.historicoAluguel = listOf(it.key)
+                funcionario.historicoAluguel = listOf(it.key)
             }
         }
         if(!encontrouInfo) {
@@ -141,7 +180,7 @@ class Biblioteca (var nome: String, var dataCriacao: String) {
         }
     }
 
-    fun efetuarVenda(infoConsulta:String){
+    fun efetuarVenda(infoConsulta:String,cliente: Cliente, funcionario: Funcionario){
         var encontrouInfo: Boolean = false
         listaLivros.forEach(){
             if(it.key.codigo == infoConsulta || it.key.titulo == infoConsulta){
@@ -151,6 +190,8 @@ class Biblioteca (var nome: String, var dataCriacao: String) {
                 it.value.forEach() {
                     it.estadoAtual = "Vendido"
                 }
+                cliente.historicoCompra = listOf(it.key)
+                funcionario.historicoVenda = listOf(it.key)
             }
         }
         if(!encontrouInfo) {
@@ -209,14 +250,14 @@ class Colecao(codigo: String, titulo: String, autor: String, anolancamento: Int,
 
 }
 
-abstract class Pessoa (var nome:String, var rg: String, var historicoAluguel: String, var historicoCompra: String){
+abstract class Pessoa (var nome:String, var rg: String, var historicoAluguel: List<LivroColecao>?, var historicoCompra: List<LivroColecao>?, var historicoVenda: List<LivroColecao>?=null){
 
 }
 
-class Cliente (nome: String, rg: String, historicoAluguel: String, historicoCompra: String) : Pessoa (nome, rg, historicoAluguel, historicoCompra){
+class Cliente (nome: String, rg: String, historicoAluguel: List<LivroColecao>?=null, historicoCompra: List<LivroColecao>?=null) : Pessoa (nome, rg, historicoAluguel, historicoCompra){
 
 }
 
-class Funcionario (nome: String, rg: String, historicoAluguel: String, historicoCompra: String) : Pessoa (nome, rg, historicoAluguel, historicoCompra){
+class Funcionario (nome: String, rg: String, historicoAluguel: List<LivroColecao>?=null, historicoVenda: List<LivroColecao>?=null) : Pessoa (nome, rg, historicoAluguel, historicoVenda){
 
 }
